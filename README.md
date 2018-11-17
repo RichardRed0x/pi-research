@@ -16,7 +16,7 @@ Understand and track the activity on Politeia. A better understanding of how the
 
 The first step is to develop methods of transforming the data from the .journal and .md files in which it is stored into more workable formats - csv as a starting point. 
 
-@s_ben is working on python scripts which will generate csv tables from the raw data. The intention is to make the scripts themselves available on GitHub along with ready to download csv files.
+@s_ben is [working on](https://github.com/s-ben/piparser) python scripts which will generate csv tables from the raw data. The intention is to make the scripts themselves available on GitHub along with ready to download csv files.
 
 The journal files have a mostly flat structure, and this should lend itself to accessible clean csv files for different objects (proposals, proposal votes, comments, comment votes).
 
