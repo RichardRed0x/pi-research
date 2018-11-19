@@ -60,26 +60,34 @@ s.votes = votes[votes$day <= 20,]
 
 #plot comments per day
 p.day.all = ggplot(comments, aes(day))+
-  geom_histogram(bins = 26)+
-  labs(y = "comments")
-ggsave("comments-by-day.png", height = 3, width = 4)
+  geom_histogram(bins = 20)+
+  labs(y = "comments")+
+  theme(axis.text=element_text(size=8))
+ggsave("comments-by-day.png", height = 2.5, width = 3)
 
 p.day.prop = ggplot(s.comments, aes(day))+
-  geom_histogram(bins = 26)+
+  geom_histogram(bins = 20)+
   facet_grid(prop.title~.)+
-  labs(y = "comments")
-ggsave("comments-by-day-by-proposal.png", height = 8, width = 4)
+  labs(y = "comments")+
+  theme(axis.text=element_text(size=5))+
+  theme(axis.title=element_text(size=8))+
+  theme(strip.text=element_text(size=7) )
+ggsave("comments-by-day-by-proposal.png", height = 6, width = 3)
 
 #plot votes per day
 p.day.all = ggplot(s.votes, aes(day))+
-  geom_histogram(bins = 26)+
-  labs(y = "votes")
-ggsave("votes-by-day.png", height = 3, width = 4)
+  geom_histogram(bins = 20)+
+  labs(y = "votes")+
+  theme(axis.text=element_text(size=8))
+ggsave("votes-by-day.png", height = 2.5, width = 3)
 
 p.day.prop = ggplot(s.votes, aes(day))+
-  geom_histogram(bins = 26)+
+  geom_histogram(bins = 20)+
   facet_grid(prop.title~.)+
-  labs(y = "votes")
+  labs(y = "votes")+
+  theme(axis.text=element_text(size=5))+
+  theme(axis.title=element_text(size=8))+
+  theme(strip.text=element_text(size=7) )
 ggsave("votes-by-day-by-proposal.png", height = 8, width = 4)
 
 
