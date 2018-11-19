@@ -14,7 +14,7 @@ Reddit automatically applies an upvote to every comment on behalf of its owner, 
 
 The figure below shows users plotted according to their total number of comments and up/down votes. There is a correlation of 0.3 between number of comments and votes. 
 
-![Comments and votes per user (public key)](/img/comments-votes-per-pubkey.png)
+![Comments and votes per user (public key)](img/comments-votes-per-pubkey.png)
 
 
 
@@ -32,11 +32,11 @@ There are some issues associated with publishing such tables, as they can turn i
 
 I considered the timing of comments relative to the opening or approval for display of the proposal. For now, these gaps are actually based on the time of the first comment, e.g. a proposal with Day = 0.5 was submitted 12 hours after the first comment on that proposal.
 
-![Histogram showing comments by time since proposal open for comments](/img/comments-by-day.png)
+![Histogram showing comments by time since proposal open for comments](img/comments-by-day.png)
 
 Histogram showing comments by time since proposal open for comments.
 
-![Histogram showing votes by time since proposal open for comments](C:/Users/richa/Documents/GitHub/pi-research/analysis/img/votes-by-day.png)
+![Histogram showing votes by time since proposal open for comments](img/comments-by-day.png)
 
 Histogram showing comment votes by time since proposal open for comments.
 
@@ -44,11 +44,11 @@ Unsurprisingly, most comments are made soon after the proposal opens, with 32% o
 
 Below there are graphs showing the timing of comments and votes per proposal. After discussion has died down, subsequent comments are often related to an event like the proposal owner editing it or responding in comments. By the time voting starts, discussion has usually ended, and there are very few comments made on proposals which are currently open for voting. These graphs are truncated at 20 days, excluding a few late comments on the DCC proposal.
 
-![Histogram showing comments by time since proposal opened, per proposal](C:/Users/richa/Documents/GitHub/pi-research/analysis/img/comments-by-day-by-proposal.png)
+![Histogram showing comments by time since proposal opened, per proposal](img/comments-by-day-by-proposal.png)
 
 Figures showing timing of comments (above) and comment votes (below) per proposal
 
-![Histogram showing votes by time since proposal opened, per proposal](C:/Users/richa/Documents/GitHub/pi-research/analysis/img/votes-by-day-by-proposal.png)
+![Histogram showing votes by time since proposal opened, per proposal](img/votes-by-day-by-proposal.png)
 
 
 
