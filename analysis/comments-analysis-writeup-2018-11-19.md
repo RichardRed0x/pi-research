@@ -1,6 +1,6 @@
 ## First look at Politeia comments and up/down votes
 
-This writeup is based on data from the comments.journal files downloaded late Nov 18th, for all 9 proposals submitted thus far. Data is available [here](/data/), the script for data collection [here](/data collection/process-comments.journal.R), R code for analysis [here](/analysis/comments-analysis-2018-11-19.R).
+This writeup is based on data from the comments.journal files downloaded late Nov 18th, for all 9 proposals submitted thus far. Data is available [here](/data/), the script for data collection [here](/data-collection/process-comments.journal.R), R code for analysis [here](/analysis/comments-analysis-2018-11-19.R).
 
 There are at this point 264 comments and 1,027 up/down votes on comments, from 80 different Pi public keys. 
 
