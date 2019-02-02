@@ -1,8 +1,22 @@
-
+setwd("C:\\Users\\richa\\Documents\\GitHub\\pi-research\\data")
 library(jsonlite)
 library(RCurl)
 
 props =read.csv("prop-urls.csv", stringsAsFactors = FALSE )
+
+x = get.comments(props$url[1])
+ptitle = props$title[props$url == url]
+x$prop.title = ptitle
+df = x[x$dummy == 2]
+
+for(url in props$url)
+{
+  x =  get.comments(url)
+  ptitle = props$title[props$url == url]
+  x$prop.title = ptitle
+  df = rbind(df, x)  
+}
+
 
   
 get.comments = function(url)
