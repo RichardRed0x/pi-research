@@ -87,6 +87,12 @@ get.comments = function(p, version)
 }
 
 
+#set last comment date
+lastcomment = function(p, version){
+  proposals$last_comment[proposals$prop.id == p] = max(df.comments$timestamp[df.comments$token == p])
+  assign('proposals', proposals, envir=.GlobalEnv)
+}
+  
 
 #creation time
 process00 = function(p, version){
@@ -171,6 +177,19 @@ update.voting.status = function(p){
   assign('proposals', proposals, envir=.GlobalEnv)
 }
 
+last.activity = function(p){
+  proposals$last_activity[proposals$prop.id == p] = max(proposals$updated_at_unix[proposals$prop.id == p], proposals$published_at_unix[proposals$prop.id == p], 
+                                                        proposals$voting_starttime[proposals$prop.id == p], proposals$voting_endtime[proposals$prop.id == p],
+                                                        proposals$last_comment[proposals$prop.id == p], na.rm = TRUE)
+  assign('proposals', proposals, envir=.GlobalEnv)
+}
+last.activity.notcomment = function(p){
+  proposals$last_activity_notcomment[proposals$prop.id == p] = max(proposals$updated_at_unix[proposals$prop.id == p], proposals$published_at_unix[proposals$prop.id == p], 
+                                                        proposals$voting_starttime[proposals$prop.id == p], proposals$voting_endtime[proposals$prop.id == p], na.rm = TRUE)
+  assign('proposals', proposals, envir=.GlobalEnv)
+}
+
+
 #take a list of proposal IDs for proposals that are new or in discussion
 
 #take a list of proposal IDs, generate the text for their headings/results
@@ -205,7 +224,29 @@ update.voting.status = function(p){
       cat(pastetext, file = "pi-digest-output.md", append = T, sep = '\n')  
     }
 
+  
+  print.twitter.result = function(p){
+    cat(paste("Proposal voting finished - ", proposals$name[proposals$prop.id == p], sep=""), file = "twitter-result-output.md", append = T, sep = '\n')
+    cat(paste(prettyNum(proposals$yes_votes[proposals$prop.id == p], big.mark = ","),
+              " Yes votes, ", prettyNum(proposals$no_votes[proposals$prop.id == p], big.mark = ","),
+              " No votes (", round(proposals$yesper[proposals$prop.id == p], 1), "% Yes) - voter participation of ",
+              round(proposals$ticket_representation[proposals$prop.id == p], 1), "%", sep="" ), file = "twitter-result-output.md", append = T, sep = '\n')
+    cat(paste("https://proposals.decred.org/proposals/",p , sep=""),   file = "twitter-result-output.md", append = T, sep = '\n') 
+    }
 
+
+    
+#print a general statement about politeia activity since timestamp X
+  #new proposals
+  #proposals voting
+  #proposals finished voting
+  #new comments
+  #new comment votes
+  #new comments and votes as daily rate
+  
+  #new proposal votes
+  #number of total ticket votes and number of unique tickets that voted
+  
 
 
 #last edited date
@@ -231,11 +272,20 @@ get.time = function(blockheight){
   return(date)
 }
 
-#function to write a table file with all the statements as I need them for Pi digest
 
 
 
-#function to prepare a data-set for plotting several proposals over time
+
+
+#functions to prepare a data-set for plotting several proposals over time
+
+prep.batch = function(props){
+  for(p in props)
+  {
+    cat(paste("python vote_analysis.py ", p, sep=""),
+        file = 'piparser.bat', append = T, sep = '\n')
+  }
+}
 
 
 prepare.votes.commits = function(proposal, name){
@@ -263,15 +313,17 @@ plot.proposals = function(commits.df, chartname){
   p.cumulative.votes = ggplot(m.commits.cumvotes, aes(x = datetime, y = value, colour = name))+
     geom_line()+
     geom_hline(aes(yintercept=8192))+
-    labs(x = "", y = "Cumulative votes")
-
+    labs(x = "", y = "Cumulative votes")+
+    theme(axis.text=element_text(size=14), axis.text.x = element_blank(), axis.ticks.x = element_blank(), axis.title = element_text(size = 20), legend.text = element_text(size = 16))
+  
   
   #show approval % over time
   p.approval = ggplot(commits.df, aes(x = datetime, y = yesper, colour = name))+
     geom_line(size = 1.1)+
     ylim(0,100)+
     geom_hline(yintercept = 60)+
-    labs(x = "", y = "Percentage Yes votes")
+    labs(x = "", y = "Percentage Yes votes")+
+    theme(axis.text=element_text(size=14), axis.text.x = element_blank(), axis.ticks.x = element_blank(), axis.title = element_text(size = 20), legend.text = element_text(size = 16))
   
   #show votes per commit
   m.commits.yesno = melt(commits.df, id.vars = c("datetime", "name"), measure.vars = c("No", "Yes"))
@@ -281,11 +333,70 @@ plot.proposals = function(commits.df, chartname){
   
   p.votes.yesno = ggplot(m.commits.yesno, aes(x = datetime, y = value, fill = name))+
     geom_bar(stat = "identity", position = "dodge")+
-    labs(fill = "Vote", x = "Datetime of vote commits", y = "Number of votes cast in hourly commit" )
+    labs(fill = "Vote", x = "Datetime of vote commits", y = "Votes per hourly commit" )+
+    theme(axis.text=element_text(size=15), axis.title = element_text(size = 20), legend.text = element_text(size = 16))+
+    scale_x_datetime(date_breaks = "1 day")+
+    geom_hline(yintercept = 0, colour = "red", size = 0.01)
   
   ggarrange(p.cumulative.votes,   p.approval, p.votes.yesno,  ncol = 1, nrow = 3)
   
   ggsave(paste(chartname, "-proposal-voting-over-time.png", sep=""),  height = 12, width = 20)
+}
+
+
+plot.proposal = function(prop.id, title){
+  prop = prop.id
+  
+  prop.df = data.frame(prop, title)
+  
+  #generate batch file for piparser
+  #prep.batch(props.df$prop)
+  
+  #prepare commits and chart
+  proposal.commits = apply(prop.df, 1, function(y) prepare.votes.commits(y['prop'], y['title']))
+  commits.df <- do.call("rbind", proposal.commits)
+  
+  commits.df$datetime = as.POSIXct(commits.df$timestamp,  origin="1970-01-01")
+  
+  
+  #make a plot showing votes over time
+  m.commits.cumvotes = melt(commits.df, id.vars = c("datetime"), measure.vars = c("cumulative.votes"))
+  
+  p.cumulative.votes = ggplot(m.commits.cumvotes, aes(x = datetime, y = value, colour = "blue"))+
+    geom_line(colour= "blue", size = 1.1)+
+    geom_hline(aes(yintercept=8192))+
+    labs(x = "", y = "Cumulative votes", title = paste("Proposal: ", title, sep=""))+
+    theme(axis.text=element_text(size=14), axis.text.x = element_blank(), axis.ticks.x = element_blank(), axis.title = element_text(size = 20), legend.text = element_text(size = 16), plot.title = element_text(size = 20))
+    
+  
+  
+  #show approval % over time
+  p.approval = ggplot(commits.df, aes(x = datetime, y = yesper))+
+    geom_line(size = 1.1, colour = "blue")+
+    ylim(0,100)+
+    geom_hline(yintercept = 60)+
+    labs(x = "", y = "Percentage Yes votes")+
+    theme(axis.text=element_text(size=14), axis.text.x = element_blank(), axis.ticks.x = element_blank(), axis.title = element_text(size = 20), legend.text = element_text(size = 16))
+  
+  #show votes per commit
+  m.commits.yesno = melt(commits.df, id.vars = c("datetime"), measure.vars = c("No", "Yes"))
+  m.commits.yesno$vote = 1
+  m.commits.yesno$vote[m.commits.yesno$variable == "No"] = -1
+  m.commits.yesno$value=  m.commits.yesno$value * m.commits.yesno$vote
+  
+  m.commits.yesno$variable = factor(m.commits.yesno$variable, levels = c("Yes", "No"))
+  
+  p.votes.yesno = ggplot(m.commits.yesno, aes(x = datetime, y = value, fill = variable))+
+    geom_bar(stat = "identity", position = "dodge")+
+    labs(fill = "Vote", x = "Datetime of vote commits", y = "Votes per hourly commit" )+
+    theme(axis.text=element_text(size=15), axis.title = element_text(size = 20), legend.text = element_text(size = 16), legend.position = c(0.98, 0.93))+
+    scale_x_datetime(date_breaks = "1 day")+
+    geom_hline(yintercept = 0, colour = "red", size = 0.01)+
+    scale_fill_manual(values = c("Green", "Red"))
+  
+  ggarrange(p.cumulative.votes,   p.approval, p.votes.yesno,  ncol = 1, nrow = 3)
+  
+  ggsave(paste(title, "-proposal-voting-over-time.png", sep=""),  height = 12, width = 20)
 }
 
 
@@ -345,11 +456,17 @@ plot.votes.proposal = function(proposal, name){
     labs(x = "", y = "Percentage Yes votes")
   
   #show votes per commit (not cumulative)
-  m.commits.yesno = melt(propcommits, id.vars = "days_since_start", measure.vars = c("No", "Yes"))
-  p.votes.yesno = ggplot(m.commits.yesno, aes(x = days_since_start, y = value, fill = variable))+
-    geom_bar(stat = "identity")+
-    labs(fill = "Vote", x = "Days since voting opened", y = "Number of votes cast in hourly commit" )+
-    theme(legend.position = c(0.05, 0.93))
+  m.commits.yesno = melt(propcommits, id.vars = c("datetime", "name"), measure.vars = c("No", "Yes"))
+  m.commits.yesno$vote = 1
+  m.commits.yesno$vote[m.commits.yesno$variable == "No"] = -1
+  m.commits.yesno$value=  m.commits.yesno$value * m.commits.yesno$vote
+  
+  p.votes.yesno = ggplot(m.commits.yesno, aes(x = datetime, y = value, fill = name))+
+    geom_bar(stat = "identity", position = "dodge")+
+    labs(fill = "Vote", x = "Datetime of vote commits", y = "Votes per hourly commit" )+
+    theme(axis.text=element_text(size=15), axis.title = element_text(size = 20), legend.text = element_text(size = 16))+
+    scale_x_datetime(date_breaks = "1 day")+
+    geom_hline(yintercept = 0, colour = "red", size = 0.7)
   
   ggarrange(p.cumulative.votes,   p.approval, p.votes.yesno, ncol = 1, nrow = 3)
   
