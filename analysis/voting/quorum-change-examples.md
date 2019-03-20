@@ -12,7 +12,7 @@ I have mocked up a data-set with evenly spaced proposal outcomes and used it to 
 
 Each point on the graph below is a (dummy) proposal, and the color reflects its outcome. The red points are proposals that would be rejected for not reaching 60% approval, these are the same in each scenario because no change to the approval percentage is being considered. Blue points are proposals that reached the 60% approval rating but would be rejected for failing to reach the quorum requirement.
 
-![Simulated/dummy proposal outcome data under 4 different quorum requirement definitions](img/quorum-requirement-graphs/simulated-proposal-outcomes-4-scenarios.png "Simulated/dummy proposal outcome data under 4 different quorum requirement definitions")
+![Simulated/dummy proposal outcome data under 4 different quorum requirement definitions](img/quorum-requirement-graphs/simulated-proposal-outcomes-4-scenarios-square.png "Simulated/dummy proposal outcome data under 4 different quorum requirement definitions")
 
 To take one of the more extreme sets of examples: under the current rules a proposal with 8,000 Yes votes and 0 No votes would fail because it did not reach the quorum requirement, whereas a proposal with 5,500 Yes votes and 2,800 No votes would pass.
 

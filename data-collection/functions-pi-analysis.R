@@ -110,8 +110,7 @@ process00 = function(p, version){
 
 #publication time
 process02 = function(p, version){
-  print(p)
-  print(version)
+
   #locate and pull in comments.journal
   filename = paste(p, "/", version, "/02.metadata.txt", sep="")
   prop.input = readChar(filename, file.info(filename)$size)
@@ -124,8 +123,7 @@ process02 = function(p, version){
 #voting period, returns eligible tickets. also returns API errors, not really working properly yet
 process15 = function(p, version){
   #locate and pull in comments.journal
-  print(p)
-  print(version)
+
   filename = paste(p, "/", version, "/15.metadata.txt", sep="")
   
   tryCatch({
@@ -192,7 +190,7 @@ last.activity.notcomment = function(p){
 
 #take a list of proposal IDs for proposals that are new or in discussion
 
-#take a list of proposal IDs, generate the text for their headings/results
+#take a list of proposal IDs, generate the text for their headings/results for pi digest
   print.results = function(p){
     if(!is.na(proposals$voting_enddate[proposals$prop.id == p])){
     pastetext = paste("**[", proposals$name[proposals$prop.id == p], "](", "https://proposals.decred.org/proposals/",
@@ -234,7 +232,98 @@ last.activity.notcomment = function(p){
     cat(paste("https://proposals.decred.org/proposals/",p , sep=""),   file = "twitter-result-output.md", append = T, sep = '\n') 
     }
 
+print.pi.until = function(timetill){
+  voted.proposals.until = proposals[!is.na(proposals$voting_endtime) & proposals$voting_endtime < timetill,]
+  votes.df.until = votes.df[votes.df$castvote.token %in% voted.proposals.until$prop.id,]
+  df.comments.until = df.comments[df.comments$timestamp < timetill,]
+  df.comment.votes.until = df.comment.votes[df.comment.votes$timestamp < timetill,]  
+  non.commenting.voters = df.comment.votes.until[!df.comment.votes.until$publickey %in% unique(df.comments.until$publickey),]
+  
+  cat(paste("As of ", strftime(as.POSIXct(timetill, origin = "1970-01-01"), "%b %e"), " on Politeia:", sep=""), file = 'journal-pi.md', sep = '\n')
+  cat(paste("* ", prettyNum(nrow(proposals), big.mark = ","), " Politeia proposals have been submitted, and ", nrow(voted.proposals.until) ,
+            " proposals have finished voting.", sep=""), file = 'journal-pi.md', sep = '\n', append = T)
+  cat(paste("* Proposals that have finished voting have an average (mean) turnout of ", round(mean(voted.proposals.until$ticket_representation), 1) , "%, with a total of ", prettyNum(nrow(votes.df.until), big.mark = ",") ,
+            " ticket votes being cast.", sep=""), file = 'journal-pi.md', sep = '\n', append = T)
+  cat(paste("* There have been ", prettyNum(nrow(df.comments.until), big.mark = ","), " comments on Politeia proposals from ", length(unique(df.comments.until$publickey)),
+            " different users (public keys).", sep=""), file = 'journal-pi.md', sep = '\n', append = T)
+  cat(paste("* There have been ", prettyNum(nrow(df.comment.votes.until), big.mark = ","), " up/down votes on comments from ", 
+            length(unique(df.comment.votes.until$publickey)), " different voting users (public keys).", sep=""),
+      file = 'journal-pi.md', append = T, sep = '\n')
+  cat(paste("* ", prettyNum(nrow(df.comment.votes.until[df.comment.votes.until$vote == 1,]), big.mark = ","), 
+            " upvotes (", round((nrow(df.comment.votes.until[df.comment.votes.until$vote == 1,])/nrow(df.comment.votes.until)),1)*100, "%) and ",
+            nrow(df.comment.votes.until[df.comment.votes.until$vote == -1,]), " downvotes (",
+            round((nrow(df.comment.votes.until[df.comment.votes.until$vote == -1,])/nrow(df.comment.votes.until)),1)*100, "%).", sep=""),
+      file = 'journal-pi.md', append = T, sep = '\n')
+  cat(paste("* There are ", length(unique(non.commenting.voters$publickey)),
+            " users who have voted but never commented, and together they have cast ", nrow(non.commenting.voters), 
+            " votes (", round((nrow(non.commenting.voters)/nrow(df.comment.votes.until))*100, digits = 1), "% of total).", sep=""),
+      file = 'journal-pi.md', append = T, sep = '\n')
+  cat(paste("* Around ", sum(df.comments.until$selfvotes), " comments (", round((sum(df.comments.until$selfvotes)/nrow(df.comments.until))*100, 0) ,
+            "%) have been upvoted by their author.", sep=""),
+      file = 'journal-pi.md', append = T, sep = '\n')
+  }
+  
+print.pi.recent = function(timesince, timetill){
+df.comments.recent = df.comments[df.comments$timestamp > timesince & df.comments$timestamp < timetill,]
+df.comment.votes.recent = df.comment.votes[df.comment.votes$timestamp > timesince & df.comment.votes$timestamp < timetill,]
+new.props = nrow(proposals[proposals$published_at_unix > timesince & proposals$published_at_unix < timetill,])
+voted.proposals.recent = proposals[!is.na(proposals$voting_endtime) & proposals$voting_endtime < timetill & proposals$voting_endtime > timesince,]
+voting.props = nrow(proposals[proposals$voting_starttime > timesince & proposals$voting_starttime < timetill & !is.na(proposals$voting_starttime),])
+votes.df.recent = votes.df[votes.df$castvote.token %in% voted.proposals.recent$prop.id,]
 
+
+  cat(paste("From ", strftime(as.POSIXct(timesince, origin = "1970-01-01"), "%b %e"), " until ", strftime(as.POSIXct(timetill, origin = "1970-01-01"), "%b %e"), " there were:", sep=""),
+      file = 'journal-pi-recent.md', sep = '\n')
+  cat(paste("* ", prettyNum(new.props, big.mark = ","), " new proposals submitted, ", voting.props,
+            " proposals started voting, ", nrow(voted.proposals.recent), " proposals finished voting.", sep=""), file = 'journal-pi-recent.md', sep = '\n', append = T)
+  cat(paste("* Proposals that have finished voting have an average (mean) turnout of ", round(mean(voted.proposals.recent$ticket_representation), 1) , "%, with a total of ", prettyNum(nrow(votes.df.recent), big.mark = ",") ,
+            " ticket votes being cast.", sep=""), file = 'journal-pi-recent.md', sep = '\n', append = T)  
+  cat(paste("* ", prettyNum(nrow(df.comments.recent), big.mark = ","), " comments on Politeia proposals from ", length(unique(df.comments.recent$publickey)),
+            " different users (public keys).", sep=""), file = 'journal-pi-recent.md', sep = '\n', append = T)
+  cat(paste("* ", prettyNum(nrow(df.comment.votes.recent), big.mark = ","), " up/down votes on comments from ", 
+            length(unique(df.comment.votes.recent$publickey)), " different voting users (public keys)."),
+      file = 'journal-pi-recent.md', append = T, sep = '\n')
+  cat(paste("* ", prettyNum(nrow(df.comment.votes.recent[df.comment.votes.recent$vote == 1,]), big.mark = ","), 
+            " upvotes (", round((nrow(df.comment.votes.recent[df.comment.votes.recent$vote == 1,])/nrow(df.comment.votes.recent)),1)*100, "%) and ",
+            nrow(df.comment.votes.recent[df.comment.votes.recent$vote == -1,]), " downvotes (",
+            round((nrow(df.comment.votes.recent[df.comment.votes.recent$vote == -1,])/nrow(df.comment.votes.recent)),1)*100, "%).", sep=""),
+      file = 'journal-pi-recent.md', append = T, sep = '\n')
+
+}
+
+fix.latevotes = function()
+{
+  prop = c("5431da8ff4eda8cdbf8f4f2e08566ffa573464b97ef6d6bae78e749f27800d3a", "60adb9c0946482492889e85e9bce05c309665b3438dd85cb1a837df31fbf57fb", "a3def199af812b796887f4eae22e11e45f112b50c2e17252c60ed190933ec14f", "c84a76685e4437a15760033725044a15ad832f68f9d123eb837337060a09f86e", "d3e7f159b9680c059a3d4b398de2c8f6627108f28b7d61a3f10397acb4b5e509")
+  title = c("", "", "", "", "")
+  props.df = data.frame(prop, title)
+  for(p in props.df$prop)
+  {
+    commits.df$endtime[commits.df$prop == p] = proposals$voting_endtime[proposals$prop.id == p]
+  }
+  commits.df$latevote = 0
+  commits.df$latevote[commits.df$timestamp > (commits.df$endtime + 3600)] = 1
+  latevotes = commits.df[commits.df$latevote == 1,]
+  for(p in props.df$prop)
+  {
+    total_votes = 
+      yes_votes = nrow(relvotes[relvotes$castvote.votebit == 2,])
+    no_votes = nrow(relvotes[relvotes$castvote.votebit == 1,])
+    
+    proposals$total_votes[proposals$prop.id == p] = sum(commits.df$Yes[commits.df$prop == p & commits.df$latevote == 0]) +sum(commits.df$No[commits.df$prop == p & commits.df$latevote == 0])
+    proposals$yes_votes[proposals$prop.id == p] = sum(commits.df$Yes[commits.df$prop == p & commits.df$latevote == 0]) 
+    proposals$no_votes[proposals$prop.id == p] = sum(commits.df$No[commits.df$prop == p & commits.df$latevote == 0])
+    proposals$ticket_representation[proposals$prop.id == p] = (proposals$total_votes[proposals$prop.id == p] /40960)*100
+    proposals$support_from[proposals$prop.id == p] = (proposals$yes_votes[proposals$prop.id == p]/40960)*100
+    proposals$yesper[proposals$prop.id == p] = (proposals$yes_votes[proposals$prop.id == p]/proposals$total_votes[proposals$prop.id == p] )*100
+    proposals$noper[proposals$prop.id == p] = (proposals$no_votes[proposals$prop.id == p]/proposals$total_votes[proposals$prop.id == p] )*100
+  }
+  assign('proposals', proposals, envir=.GlobalEnv)
+  
+  
+  
+  
+}
+  
     
 #print a general statement about politeia activity since timestamp X
   #new proposals
@@ -289,6 +378,7 @@ prep.batch = function(props){
 
 
 prepare.votes.commits = function(proposal, name){
+  print(proposal)
   propvotes = read.csv(paste(proposal, "_votes.csv", sep=""), stringsAsFactors = FALSE)
   propvotes$time_since_start = propvotes$timestamp - min(propvotes$timestamp)
   propvotes$prop = proposal
@@ -346,7 +436,7 @@ plot.proposals = function(commits.df, chartname){
 
 plot.proposal = function(prop.id, title){
   prop = prop.id
-  
+  print(prop)
   prop.df = data.frame(prop, title)
   
   #generate batch file for piparser
@@ -368,7 +458,6 @@ plot.proposal = function(prop.id, title){
     labs(x = "", y = "Cumulative votes", title = paste("Proposal: ", title, sep=""))+
     theme(axis.text=element_text(size=14), axis.text.x = element_blank(), axis.ticks.x = element_blank(), axis.title = element_text(size = 20), legend.text = element_text(size = 16), plot.title = element_text(size = 20))
     
-  
   
   #show approval % over time
   p.approval = ggplot(commits.df, aes(x = datetime, y = yesper))+

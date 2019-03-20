@@ -40,6 +40,50 @@ p.yesno = ggplot(yesno.m, aes(x = no, y = yes, colour = value) )+
 
 ggsave("simulated-proposal-outcomes-4-scenarios.png", width = 6, height = 12, dpi = 500)
 
+p.yesno.1 = ggplot(yesno.m[yesno.m$variable == "current",], aes(x = no, y = yes, colour = value) )+
+  geom_point(size = 0.2)+
+  labs(colour = "Outcome", x = "No votes", y = "Yes votes")+
+  theme(legend.position="bottom")+
+  ggtitle("20% Yes/No votes")
+
+p.yesno.2 = ggplot(yesno.m[yesno.m$variable == "yes12",], aes(x = no, y = yes, colour = value) )+
+  geom_point(size = 0.2)+
+  labs(colour = "Outcome", x = "No votes", y = "Yes votes")+
+  ggtitle("12% Yes votes")
+
+p.yesno.3 = ggplot(yesno.m[yesno.m$variable == "yes16",], aes(x = no, y = yes, colour = value) )+
+  geom_point(size = 0.2)+
+  labs(colour = "Outcome", x = "No votes", y = "Yes votes")+
+  ggtitle("16% Yes votes")
+
+p.yesno.4 = ggplot(yesno.m[yesno.m$variable == "yes20",], aes(x = no, y = yes, colour = value) )+
+  geom_point(size = 0.2)+
+  labs(colour = "Outcome", x = "No votes", y = "Yes votes")+
+  ggtitle("20% Yes votes")
+
+
+g_legend<-function(a.gplot){
+  tmp <- ggplot_gtable(ggplot_build(a.gplot))
+  leg <- which(sapply(tmp$grobs, function(x) x$name) == "guide-box")
+  legend <- tmp$grobs[[leg]]
+  return(legend)}
+
+mylegend<-g_legend(p.yesno.1)
+
+
+p.yesno.square = grid.arrange(p.yesno.1, p.yesno.2, p.yesno.3, p.yesno.4, nrow = 2)
+
+p.yesno.square = grid.arrange(arrangeGrob(p.yesno.1 + theme(legend.position = "none"), 
+                                          p.yesno.2 + theme(legend.position = "none"),
+                                          p.yesno.3 + theme(legend.position = "none"),
+                                          p.yesno.4 + theme(legend.position = "none"),
+                                          nrow = 2),
+                              mylegend, nrow=2,heights=c(10, 1))
+
+
+
+ggsave("simulated-proposal-outcomes-4-scenarios-square.png", plot = p.yesno.square, width = 6, height = 6, dpi = 500)
+
 
 voted.proposals = proposals[!is.na(proposals$voting_endtime),]
 
