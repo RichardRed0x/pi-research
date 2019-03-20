@@ -9,6 +9,7 @@ I have mocked up a data-set with evenly spaced proposal outcomes and used it to 
 * yes12: requirement that 12% of eligible tickets vote Yes - this would be equivalent of removing No votes from how the quorum requirement is currently defined.
 * yes16: requirement that 16% of eligible tickets vote Yes.
 * yes20: requirement that 20% of eligible tickets vote Yes.
+* **Addition:** score12: requirement that the net Yes - No score must be greater than 12% of tickets (Dash uses this kind of quorum, with a 10% cut-off)
 
 Each point on the graph below is a (dummy) proposal, and the color reflects its outcome. The red points are proposals that would be rejected for not reaching 60% approval, these are the same in each scenario because no change to the approval percentage is being considered. Blue points are proposals that reached the 60% approval rating but would be rejected for failing to reach the quorum requirement.
 

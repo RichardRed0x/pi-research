@@ -25,13 +25,20 @@ yesno$yes16[yesno$yes > 6554] = "Quorum met"
 yesno$yes20 = "Quorum not met"
 yesno$yes20[yesno$yes > 8192] = "Quorum met"
 
+
+
 yesno$current[yesno$approval < 60] = "Approval not met"
 yesno$yes12[yesno$approval < 60] = "Approval not met"
 yesno$yes16[yesno$approval < 60] = "Approval not met"
 yesno$yes20[yesno$approval < 60] = "Approval not met"
 
 
-yesno.m = melt(yesno, id.vars = c("yes", "no"), measure.vars = c("current", "yes12", "yes16", "yes20"))
+yesno$score = yesno$yes - yesno$no
+yesno$score12 = "Quorum not met"
+yesno$score12[yesno$score > 4915] = "Quorum met"
+yesno$score12[yesno$approval < 60] = "Approval not met"
+
+yesno.m = melt(yesno, id.vars = c("yes", "no"), measure.vars = c("current", "yes12", "yes16", "yes20", "score12"))
 
 p.yesno = ggplot(yesno.m, aes(x = no, y = yes, colour = value) )+
   facet_grid(variable ~ .)+
@@ -41,26 +48,30 @@ p.yesno = ggplot(yesno.m, aes(x = no, y = yes, colour = value) )+
 ggsave("simulated-proposal-outcomes-4-scenarios.png", width = 6, height = 12, dpi = 500)
 
 p.yesno.1 = ggplot(yesno.m[yesno.m$variable == "current",], aes(x = no, y = yes, colour = value) )+
-  geom_point(size = 0.2)+
+  geom_point(size = 0.3)+
   labs(colour = "Outcome", x = "No votes", y = "Yes votes")+
   theme(legend.position="bottom")+
   ggtitle("20% Yes/No votes")
 
 p.yesno.2 = ggplot(yesno.m[yesno.m$variable == "yes12",], aes(x = no, y = yes, colour = value) )+
-  geom_point(size = 0.2)+
+  geom_point(size = 0.3)+
   labs(colour = "Outcome", x = "No votes", y = "Yes votes")+
   ggtitle("12% Yes votes")
 
 p.yesno.3 = ggplot(yesno.m[yesno.m$variable == "yes16",], aes(x = no, y = yes, colour = value) )+
-  geom_point(size = 0.2)+
+  geom_point(size = 0.3)+
   labs(colour = "Outcome", x = "No votes", y = "Yes votes")+
   ggtitle("16% Yes votes")
 
 p.yesno.4 = ggplot(yesno.m[yesno.m$variable == "yes20",], aes(x = no, y = yes, colour = value) )+
-  geom_point(size = 0.2)+
+  geom_point(size = 0.3)+
   labs(colour = "Outcome", x = "No votes", y = "Yes votes")+
   ggtitle("20% Yes votes")
 
+p.yesno.5 = ggplot(yesno.m[yesno.m$variable == "score12",], aes(x = no, y = yes, colour = value) )+
+  geom_point(size = 0.3)+
+  labs(colour = "Outcome", x = "No votes", y = "Yes votes")+
+  ggtitle("12% Yes-No score")
 
 g_legend<-function(a.gplot){
   tmp <- ggplot_gtable(ggplot_build(a.gplot))
@@ -80,9 +91,19 @@ p.yesno.square = grid.arrange(arrangeGrob(p.yesno.1 + theme(legend.position = "n
                                           nrow = 2),
                               mylegend, nrow=2,heights=c(10, 1))
 
+mylegend2<-g_legend(p.yesno.2)
+p.yesno.rectangle = grid.arrange(arrangeGrob(p.yesno.1 + theme(legend.position = "none"), 
+                                          p.yesno.2 + theme(legend.position = "none"),
+                                          p.yesno.3 + theme(legend.position = "none"),
+                                          p.yesno.4 + theme(legend.position = "none"),
+                                          p.yesno.5 + theme(legend.position = "none"),
+                                          mylegend2,
+                                          nrow = 3)
+                                 )
 
 
-ggsave("simulated-proposal-outcomes-4-scenarios-square.png", plot = p.yesno.square, width = 6, height = 6, dpi = 500)
+
+ggsave("simulated-proposal-outcomes-5-scenarios.png", plot = p.yesno.rectangle, width = 7, height = 7, dpi = 500)
 
 
 voted.proposals = proposals[!is.na(proposals$voting_endtime),]
