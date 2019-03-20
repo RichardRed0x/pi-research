@@ -103,7 +103,7 @@ p.yesno.rectangle = grid.arrange(arrangeGrob(p.yesno.1 + theme(legend.position =
 
 
 
-ggsave("simulated-proposal-outcomes-5-scenarios.png", plot = p.yesno.rectangle, width = 7, height = 7, dpi = 500)
+ggsave("simulated-proposal-outcomes-5-scenarios.png", plot = p.yesno.rectangle, width = 7, height = 10.5, dpi = 500)
 
 
 voted.proposals = proposals[!is.na(proposals$voting_endtime),]
