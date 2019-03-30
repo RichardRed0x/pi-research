@@ -123,21 +123,24 @@ process02 = function(p, version){
 #voting period, returns eligible tickets. also returns API errors, not really working properly yet
 process15 = function(p, version){
   #locate and pull in comments.journal
-
+  
   filename = paste(p, "/", version, "/15.metadata.txt", sep="")
   
   tryCatch({
-  prop.input = readChar(filename, file.info(filename)$size)
-  
-  prop = fromJSON(prop.input, flatten = TRUE)
-  
-  proposals$voting_startblock[proposals$prop.id == p] = prop$startblockheight
-  proposals$voting_endblock[proposals$prop.id == p] = prop$endheight
-  assign('proposals', proposals, envir=.GlobalEnv)
-    return(prop$eligibletickets)
-}, error=function(e){cat("ERROR :",conditionMessage(e), "\n")})
+    prop.input = readChar(filename, file.info(filename)$size)
+    
+    prop = fromJSON(prop.input, flatten = TRUE)
+    
+    propid = seq(1:length(prop$eligibletickets))
+    pdf = data.frame(prop$eligibletickets, propid)
+    pdf$propid = p
+    
+    proposals$voting_startblock[proposals$prop.id == p] = prop$startblockheight
+    proposals$voting_endblock[proposals$prop.id == p] = prop$endheight
+    assign('proposals', proposals, envir=.GlobalEnv)
+    return(pdf)
+  }, error=function(e){cat("ERROR :",conditionMessage(e), "\n")})
 }
-
 #process ballots to find out about vote state
 process.ballot = function(p, version){
   filename = paste(p, "/", version, "/plugins/decred/ballot.journal", sep="")
