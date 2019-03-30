@@ -46,21 +46,19 @@ I have fitted some Poisson regression models to see if the state of the proposal
 
 This graph shows how far from the final approval percentage the tally was after each commit (hour), with points for every proposal coloured according to their proposal. The lines are loess smoothers, to diminish some of the noisiness in the data. This graph is admittedly hard to read, but it contains quite a lot of information. For every proposal so far, once 2,500 votes had been cast the approval percentage was within 20% of the final result. After 5,000 votes were cast, 12 of the 17 proposals were within 10% of their final approval score. 
 
-It is more common for proposals to have an approval percentage that is lower than the final outcome while voting is open. The chart below shows all data about whether the tally at a given commit predicted the voting outcome for each of the 17 proposals (some proposals have a lower number of commits because if they were not voted on in an hour they do not have a commit for that hour). The result as it stands after around 10 commits/hours is almost always predictive of the final result. It has been rare for a proposal to have an approval score greater than 60% during the voting period and then fail to reach 60% at the end of the voting period.
+It is more common for proposals to have an approval percentage that is lower than the final outcome while voting is open. The chart below shows all data about whether the tally at a given commit predicted the voting outcome for each of the 17 proposals (some proposals have a lower number of commits because if they were not voted on in an hour they do not have a commit for that hour). The result as it stands after around 10 commits/hours is almost always predictive of the final result. It has been particularly rare for a proposal to have an approval score greater than 60% during the voting period and then fail to reach 60% at the end of the voting period.
 
 ![Does the tally at each commit predict the eventual outcome?](img/tally-at-commit-x-predicts-result.png "Does the tally at each commit predict the eventual outcome?")
 
 
 
+#### Follow up questions:
 
+Do tickets tend to vote on all open proposals at the same time?
 
-Do tickets vote on all open proposals at the same time?
+Do tickets tend to vote at the same stage in a voting period? e.g. always early/late?
 
-
-
-Do ticket-holders tend to vote at the same stage in a voting period? e.g. always early/late?
-
-
+Can tickets be clustered based on their proposal voting? i.e. did tickets that voted Yes on prop X vote no on props Y and Z?
 
 
 
