@@ -121,14 +121,15 @@ for(p in voted.proposals$prop.id)
 
 commits.df$yesper_divergence = commits.df$yesper - commits.df$final_yesper
 
-p.yesper.divergence = ggplot(commits.df, aes(x = cumulative.votes, y = yesper_divergence, colour = prop))+
+p.yesper.divergence = ggplot(commits.df, aes(x = cumulative.votes, y = yesper_divergence, colour = result))+
   geom_smooth(se = FALSE, size = 0.1)+
   geom_point(size = 0.6)+
-  theme(legend.position = "none")+
+  scale_color_manual(values = c("darkgreen", "red"))+
+#  theme(legend.position = "none")+
   xlab("Cumulative number of votes cast at commit")+
   ylab("Approval % distance from final result")
   
-ggsave("distance-from-final-outcome-by-votes-cast.png", width = 10, height = 5)  
+ggsave("distance-from-final-outcome-by-votes-cast-approval-color.png", width = 10, height = 5)  
 
 #how many props were within 10% of final core after 5000 votes?
 

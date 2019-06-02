@@ -137,6 +137,7 @@ process15 = function(p, version){
     
     proposals$voting_startblock[proposals$prop.id == p] = prop$startblockheight
     proposals$voting_endblock[proposals$prop.id == p] = prop$endheight
+    proposals$eligible_tickets[proposals$prop.id == p] = nrow(pdf)
     assign('proposals', proposals, envir=.GlobalEnv)
     return(pdf)
   }, error=function(e){cat("ERROR :",conditionMessage(e), "\n")})
@@ -165,11 +166,13 @@ update.voting.status = function(p){
   total_votes = nrow(relvotes)
   yes_votes = nrow(relvotes[relvotes$castvote.votebit == 2,])
   no_votes = nrow(relvotes[relvotes$castvote.votebit == 1,])
+  eligible_tickets = proposals$eligible_tickets[proposals$prop.id == p] 
   
   proposals$total_votes[proposals$prop.id == p] = total_votes
   proposals$yes_votes[proposals$prop.id == p] = yes_votes
   proposals$no_votes[proposals$prop.id == p] = no_votes
-  proposals$ticket_representation[proposals$prop.id == p] = (total_votes/40960)*100
+  
+  proposals$ticket_representation[proposals$prop.id == p] = (total_votes/eligible_tickets)*100
   proposals$support_from[proposals$prop.id == p] = (yes_votes/40960)*100
   proposals$yesper[proposals$prop.id == p] = (yes_votes/total_votes)*100
   proposals$noper[proposals$prop.id == p] = (no_votes/total_votes)*100
@@ -357,8 +360,7 @@ fix.latevotes = function()
 get.time = function(blockheight){
   url = paste("https://explorer.dcrdata.org/api/block/", blockheight, sep="")
   
-  block.input = getURL(url)
-  block = fromJSON(block.input, flatten = TRUE)
+  block = fromJSON(url, flatten = TRUE)
   time = block$time
   date = as.POSIXct(time, origin="1970-01-01")
   return(date)
