@@ -367,7 +367,18 @@ get.time = function(blockheight){
 }
 
 
+#functions to prepare user data-set
 
+
+process.pubkey = function(pk){
+  #fetch json for pubkey
+  
+  url = paste("https://proposals.decred.org/api/v1/users?publickey=", pk, sep="")
+  
+  user = fromJSON(url, flatten = TRUE)
+  username = user$users$username
+  return(username)
+}
 
 
 
