@@ -12,15 +12,15 @@ The Politeia API has recently been extended to allow user IDs and names to be lo
 
 There follows some high-level analysis of the data as it was on 30 July 2019 (this [commit](https://github.com/decred-proposals/mainnet/commit/6d54651a435106825f1ca13cce3ba325519bd787)).
 
-![Histogram showing comments per user](img/pi-users-comments-histogram.png"Histogram showing comments per user")
+![Histogram showing comments per user](img/pi-users-comments-histogram.png "Histogram showing comments per user")
 
-![Histogram showing votes per user](img/pi-users-votes-histogram.png"Histogram showing votes per user")
+![Histogram showing votes per user](img/pi-users-votes-histogram.png "Histogram showing votes per user")
 
 The number of votes and comments per user is highly skewed and follows a power law type distribution whereby a small number of highly active users account for a large proportion of activity. This kind of distribution is common to more or less all online social platforms.
 
 The graphs above exclude an outlier - @bee, who with 132 comments and 661 votes is the most active user by far, and accounts for 11% of all comments and 19% of all comment votes.
 
-![Scatterplot showing votes and comments per user (each point is a user)](img/pi-users-votes-comments-scatterplot.png"Scatterplot showing votes and comments per user (each point is a user)")
+![Scatterplot showing votes and comments per user (each point is a user)](img/pi-users-votes-comments-scatterplot.png "Scatterplot showing votes and comments per user (each point is a user)")
 
 In general there is a correlation between no. of comments and votes, but there are also users who are mostly active in just one of those ways. 32% of Pi users only commented (17%) or voted (15%). 
 
