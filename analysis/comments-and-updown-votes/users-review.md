@@ -16,7 +16,7 @@ There follows some high-level analysis of the data as it was on 30 July 2019 (th
 
 ![Histogram showing votes per user](img/pi-users-votes-histogram.png "Histogram showing votes per user")
 
-The number of votes and comments per user is highly skewed and follows a power law type distribution whereby a small number of highly active users account for a large proportion of activity. This kind of distribution is common to more or less all online social platforms.
+The number of votes (mean 22.6) and comments (mean 7.7) per user is highly skewed and follows a power law type distribution whereby a small number of highly active users account for a large proportion of activity. This kind of distribution is common to more or less all online social platforms.
 
 The graphs above exclude an outlier - @bee, who with 132 comments and 661 votes is the most active user by far, and accounts for 11% of all comments and 19% of all comment votes.
 
@@ -27,3 +27,4 @@ In general there is a correlation between no. of comments and votes, but there a
 280 votes (7% of total) came from users who have never commented, and who are therefore invisible on the proposals site.
 
 Thanks to @s_ben for implementing the API endpoint that allows user IDs and names to be retrieved, and to @lukebp for helping me figure out how to process a series of up/down votes and revocations by the same user to arrive at the same conclusion as the Pi server about how they ultimately voted. Every time a user clicks those up/down voting buttons this is recorded in the repository as an action, and the server figures out the current state by processing those actions in sequence.
+
