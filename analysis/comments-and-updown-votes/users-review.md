@@ -5,7 +5,7 @@ The Politeia API has recently been extended to allow user IDs and names to be lo
 * comments: no. of comments made
 * upvotes: no. of upvotes cast
 * downvotes: no. of downvotes cast
-* commentscore: aggregated score of the user's comments
+* commentscore: aggregated score of the user's comments, like reddit karma score
 * score.per.comment: commentscore divided by no. of comments
 * votes: total no. of votes cast
 * proposals: no. of proposals submitted
@@ -27,4 +27,3 @@ In general there is a correlation between no. of comments and votes, but there a
 280 votes (7% of total) came from users who have never commented, and who are therefore invisible on the proposals site.
 
 Thanks to @s_ben for implementing the API endpoint that allows user IDs and names to be retrieved, and to @lukebp for helping me figure out how to process a series of up/down votes and revocations by the same user to arrive at the same conclusion as the Pi server about how they ultimately voted. Every time a user clicks those up/down voting buttons this is recorded in the repository as an action, and the server figures out the current state by processing those actions in sequence.
-
