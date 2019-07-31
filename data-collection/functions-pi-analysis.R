@@ -210,12 +210,6 @@ last.activity.notcomment = function(p){
                            round(proposals$ticket_representation[proposals$prop.id == p], 1), "%, support from ",
                            round(proposals$support_from[proposals$prop.id == p], 0), "% of tickets.", sep="" )
       cat(pastetext2,  file = "pi-digest-output.md", append = T, sep = '\n')
-  pastetext2 =   paste(prettyNum(proposals$yes_votes[proposals$prop.id == p], big.mark = ","),
-                       " Yes votes, ", prettyNum(proposals$no_votes[proposals$prop.id == p], big.mark = ","),
-                       " No votes (", round(proposals$yesper[proposals$prop.id == p], 1), "% Yes) - voter participation of ",
-                       round(proposals$ticket_representation[proposals$prop.id == p], 1), "%, support from ",
-                       round(proposals$support_from[proposals$prop.id == p], 0), "% of tickets.", sep="" )
-  cat(pastetext2,  file = "pi-digest-output.md", append = T, sep = '\n')
   #proposers which are open for voting
   } else if (!is.na(proposals$voting_starttime[proposals$prop.id == p])) {
       pastetext = paste("**[", proposals$name[proposals$prop.id == p], "](", "https://proposals.decred.org/proposals/",
