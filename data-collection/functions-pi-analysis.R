@@ -198,21 +198,33 @@ last.activity.notcomment = function(p){
 
 #take a list of proposal IDs, generate the text for their headings/results for pi digest
   print.results = function(p){
+    #if proposal voting enddate is theree (voting has finished)
     if(!is.na(proposals$voting_enddate[proposals$prop.id == p])){
-    pastetext = paste("**[", proposals$name[proposals$prop.id == p], "](", "https://proposals.decred.org/proposals/",
-                      p, ") - voting finished ", strftime(proposals$voting_enddate[proposals$prop.id == p], "%b %e"),
-                      " - ", proposals$comments[proposals$prop.id == p], " comments ()**", sep="")
-  cat(pastetext, file = "pi-digest-output.md", append = T, sep = '\n')
+      pastetext = paste("**[", proposals$name[proposals$prop.id == p], "](", "https://proposals.decred.org/proposals/",
+                        p, ") - voting finished ", strftime(proposals$voting_enddate[proposals$prop.id == p], "%b %e"),
+                        " - ", proposals$comments[proposals$prop.id == p], " comments ()**", sep="")
+      cat(pastetext, file = "pi-digest-output.md", append = T, sep = '\n')
+      pastetext2 =   paste(prettyNum(proposals$yes_votes[proposals$prop.id == p], big.mark = ","),
+                           " Yes votes, ", prettyNum(proposals$no_votes[proposals$prop.id == p], big.mark = ","),
+                           " No votes (", round(proposals$yesper[proposals$prop.id == p], 1), "% Yes) - voter participation of ",
+                           round(proposals$ticket_representation[proposals$prop.id == p], 1), "%, support from ",
+                           round(proposals$support_from[proposals$prop.id == p], 0), "% of tickets.", sep="" )
+      cat(pastetext2,  file = "pi-digest-output.md", append = T, sep = '\n')
   pastetext2 =   paste(prettyNum(proposals$yes_votes[proposals$prop.id == p], big.mark = ","),
                        " Yes votes, ", prettyNum(proposals$no_votes[proposals$prop.id == p], big.mark = ","),
                        " No votes (", round(proposals$yesper[proposals$prop.id == p], 1), "% Yes) - voter participation of ",
                        round(proposals$ticket_representation[proposals$prop.id == p], 1), "%, support from ",
                        round(proposals$support_from[proposals$prop.id == p], 0), "% of tickets.", sep="" )
   cat(pastetext2,  file = "pi-digest-output.md", append = T, sep = '\n')
+  #proposers which are open for voting
   } else if (!is.na(proposals$voting_starttime[proposals$prop.id == p])) {
       pastetext = paste("**[", proposals$name[proposals$prop.id == p], "](", "https://proposals.decred.org/proposals/",
-                        p, ") - voting started on ", strftime(proposals$voting_startdate[proposals$prop.id == p], "%b %e"),
-                        " - ", proposals$comments[proposals$prop.id == p], " comments ()**", sep="")
+                        p, ")**", sep='')
+      cat(pastetext, file = "pi-digest-output.md", append = T, sep = '\n')      
+      pastetext = paste("Published ", strftime(proposals$published_at[proposals$prop.id == p], "%b %e"),
+                        " by ", proposals$username[proposals$prop.id == p], " last updated ", strftime(proposals$updated_at[proposals$prop.id == p], "%b %e"),
+                        " - voting started on ", strftime(proposals$voting_startdate[proposals$prop.id == p], "%b %e"),
+                        " - ", proposals$comments[proposals$prop.id == p], " comments ()", sep="")  
       cat(pastetext, file = "pi-digest-output.md", append = T, sep = '\n')
       pastetext2 =   paste("Latest voting figures: ", prettyNum(proposals$yes_votes[proposals$prop.id == p], big.mark = ","),
                            " Yes votes, ", prettyNum(proposals$no_votes[proposals$prop.id == p], big.mark = ","),
@@ -221,10 +233,13 @@ last.activity.notcomment = function(p){
                            round(proposals$support_from[proposals$prop.id == p], 0), "% of tickets.", sep="" )
       cat(pastetext2,  file = "pi-digest-output.md", append = T, sep = '\n')      
   }
-      pastetext = paste("**[", proposals$name[proposals$prop.id == p], "](", "https://proposals.decred.org/proposals/",
-                        p, ") - published ", strftime(proposals$published_at[proposals$prop.id == p], "%b %e"),
-                        " by XXXXXX, last updated ", strftime(proposals$updated_at[proposals$prop.id == p], "%b %e"),
-                        " - ",  proposals$comments[proposals$prop.id == p], " comments ()**", sep="")  
+    #new proposals
+    pastetext = paste("**[", proposals$name[proposals$prop.id == p], "](", "https://proposals.decred.org/proposals/",
+                      p, ")**", sep='')
+    cat(pastetext, file = "pi-digest-output.md", append = T, sep = '\n')      
+    pastetext = paste("Published ", strftime(proposals$published_at[proposals$prop.id == p], "%b %e"),
+                      " by ", proposals$username[proposals$prop.id == p], " last updated ", strftime(proposals$updated_at[proposals$prop.id == p], "%b %e"),
+                      " - ", proposals$comments[proposals$prop.id == p], " comments ()", sep="")  
       cat(pastetext, file = "pi-digest-output.md", append = T, sep = '\n')  
     }
 
@@ -284,10 +299,10 @@ votes.df.recent = votes.df[votes.df$castvote.token %in% voted.proposals.recent$p
             " proposals started voting, ", nrow(voted.proposals.recent), " proposals finished voting.", sep=""), file = 'journal-pi-recent.md', sep = '\n', append = T)
   cat(paste("* Proposals that have finished voting have an average (mean) turnout of ", round(mean(voted.proposals.recent$ticket_representation), 1) , "%, with a total of ", prettyNum(nrow(votes.df.recent), big.mark = ",") ,
             " ticket votes being cast.", sep=""), file = 'journal-pi-recent.md', sep = '\n', append = T)  
-  cat(paste("* ", prettyNum(nrow(df.comments.recent), big.mark = ","), " comments on Politeia proposals from ", length(unique(df.comments.recent$publickey)),
-            " different users (public keys).", sep=""), file = 'journal-pi-recent.md', sep = '\n', append = T)
+  cat(paste("* ", prettyNum(nrow(df.comments.recent), big.mark = ","), " comments on Politeia proposals from ", length(unique(df.comments.recent$username)),
+            " different users.", sep=""), file = 'journal-pi-recent.md', sep = '\n', append = T)
   cat(paste("* ", prettyNum(nrow(df.comment.votes.recent), big.mark = ","), " up/down votes on comments from ", 
-            length(unique(df.comment.votes.recent$publickey)), " different voting users (public keys)."),
+            length(unique(df.comments.recent$username)), " different voting users."),
       file = 'journal-pi-recent.md', append = T, sep = '\n')
   cat(paste("* ", prettyNum(nrow(df.comment.votes.recent[df.comment.votes.recent$vote == 1,]), big.mark = ","), 
             " upvotes (", round((nrow(df.comment.votes.recent[df.comment.votes.recent$vote == 1,])/nrow(df.comment.votes.recent)),1)*100, "%) and ",

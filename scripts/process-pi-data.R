@@ -297,123 +297,25 @@ decred.proposals.pi = subset(voted.props, select = c(name,url,yes_votes,no_votes
 
 write.csv(decred.proposals.pi, "Decred-proposals-pi.csv", row.names = FALSE)
 
+#prepare info for texts
+x = sapply(proposals$prop.id, last.activity)
+x = sapply(proposals$prop.id, last.activity.notcomment)
+
+#select the props to be processed and written up - from date of last snapshot for Pi digest or Journal
+recentprops = proposals[proposals$last_activity > 1561851000,]
 
 
+#print results for Pi digest
+x = sapply(recentprops$prop.id, print.results)
 
-# produce a text with information that can be used by Journal
+#print twitter results
 
-non.commenting.voters = df.comment.votes[!df.comment.votes$publickey %in% unique(df.comments$publickey),]
+props = recentprops$prop.id
+x = sapply(props, print.twitter.result)
 
-
-cat(paste("* There are currently ", prettyNum(nrow(df.comments), big.mark = ","), " comments on Politeia proposals from", length(unique(df.comments$publickey)),
-          " different users (public keys)."), file = 'journal-pi.md', sep = '\n')
-cat(paste("* There are a total of ", prettyNum(nrow(df.comment.votes), big.mark = ","), " up/down votes on comments from ", 
-          length(unique(df.comment.votes$publickey)), " different voting users (public keys)."),
-    file = 'journal-pi.md', append = T, sep = '\n')
-cat(paste("* There have been ", prettyNum(nrow(df.comment.votes[df.comment.votes$vote == 1,]), big.mark = ","), 
-          " upvotes (", round((nrow(df.comment.votes[df.comment.votes$vote == 1,])/nrow(df.comment.votes)),1)*100, "%) and ",
-          nrow(df.comment.votes[df.comment.votes$vote == -1,]), " downvotes (",
-          round((nrow(df.comment.votes[df.comment.votes$vote == -1,])/nrow(df.comment.votes)),1)*100, "%).", sep=""),
-    file = 'journal-pi.md', append = T, sep = '\n')
-cat(paste("* There are ", length(unique(non.commenting.voters$publickey)),
-          " voting users who have never commented, and together they have cast ", nrow(non.commenting.voters), 
-          " votes (", round((nrow(non.commenting.voters)/nrow(df.comment.votes))*100, digits = 1), "% of total).", sep=""),
-    file = 'journal-pi.md', append = T, sep = '\n')
+#print recent stats for pi digest and journal - can use sys.time if used at snapshot time
+print.pi.recent(1561851000, Sys.time())
 
 
 
 
-#show comments and comment scores by pubkey
-
-pubkey = unique(df$publickey)
-no.comments = seq(1:length(pubkey))
-pk.df.all = data.frame(pubkey, no.comments)
-
-for(pk in pk.df.all$pubkey)
-{
-  relcomments = df.comments[df.comments$publickey == pk,]
-  
-  pk.df.all$no.comments[pk.df.all$pubkey == pk] = nrow(df.comments[df.comments$publickey == pk,])
-  pk.df.all$comments.score[pk.df.all$pubkey == pk] = sum(df.comments$score[df.comments$publickey == pk]) 
-  
-  pk.df.all$comments.upvotes[pk.df.all$pubkey == pk] = sum(df.comments$votes[df.comments$publickey == pk & df.comments]) 
-  
-}
-
-write.csv(pk.df.all, file = "pi-commenters.csv", row.names = FALSE)
-
-
-
-#top recent commenters
-recent.comments = df.comments[df.comments$timestamp > 1550533138,]
-
-pubkey = unique(df$publickey)
-no.comments = seq(1:length(pubkey))
-pk.df = data.frame(pubkey, no.comments)
-
-for(pk in pk.df$pubkey)
-{
-  relcomments = recent.comments[recent.comments$publickey == pk,]
-  
-  pk.df$no.comments[pk.df$pubkey == pk] = nrow(recent.comments[recent.comments$publickey == pk,])
-  pk.df$comments.score[pk.df$pubkey == pk] = sum(recent.comments$score[recent.comments$publickey == pk]) 
-}
-
-write.csv(pk.df, file = "recent-commenters.csv", row.names = FALSE)
-
-#df.comments[df.comments$publickey == "2323bc09222c6f68ed63c96da24bc735d3b5b4bca674714b0130fedebe7e29e7",][1,]
-
-
-
-
-#plot votes over time for a selection of proposals
-
-#list of proposals
-
-
-#plotting voting activity over time
-#fetch and combine commits for all proposals
-
-prop = c("2ababdea7da2b3d8312a773d477272135a883ed772ba99cdf31eddb5f261d571", "aea224a561cfed183f514a9ac700d68ba8a6c71dfbee71208fb9bff5fffab51d")
-title = c("Trust Wallet", "ATM Integration")
-
-props.df = data.frame(prop, title)
-
-#generate batch file for piparser
-prep.batch(props.df$prop)
-
-#prepare commits and chart
-proposal.commits = apply(props.df, 1, function(y) prepare.votes.commits(y['prop'], y['title']))
-commits.df <- do.call("rbind", proposal.commits)
-
-commits.df$datetime = as.POSIXct(commits.df$timestamp,  origin="1970-01-01")
-
-plot.proposals(commits.df, "test")
-
-
-#since X date there have been
-
-
-
-
-#activity plots for politeia action
-
-
-
-
-
-
-
-#journal
-
-
-#find total users and comments and votes
-
-
-#find new users comments and votes since time X
-
-
-#draw voting graph for 1 proposal directly from the piparser output csv
-
-plot.votes.proposal("fb8e6ca361c807168ea0bd6ddbfb7e05896b78f2576daf92f07315e6f8b5cd83", "community-website")
-plot.votes.proposal("60adb9c0946482492889e85e9bce05c309665b3438dd85cb1a837df31fbf57fb", "IDAX")
