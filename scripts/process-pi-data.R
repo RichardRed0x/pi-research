@@ -6,7 +6,6 @@ library(dplyr)
 
 
 
-
 #populate full list of proposals and version numbers
 prop.id = fetch.proposals()
 
@@ -44,11 +43,11 @@ username = seq(1:length(pubkey))
 keynames = data.frame(pubkey, username)  
 
 
-#for(pk in keynames$pubkey)
-#{
-#  keynames$username[keynames$pubkey == pk] = process.pubkey(pk)
-#}
-#write.csv(keynames, file = "pi-user-keys-names.csv", row.names = FALSE)
+for(pk in keynames$pubkey)
+{
+  keynames$username[keynames$pubkey == pk] = process.pubkey(pk)
+}
+write.csv(keynames, file = "pi-user-keys-names.csv", row.names = FALSE)
 
 keynames = read.csv("pi-user-keys-names.csv", stringsAsFactors = FALSE)
 
@@ -244,7 +243,7 @@ x = sapply(proposals$prop.id, last.activity.notcomment)
 
 
 voted.props = proposals[!is.na(proposals$voting_endtime),]
-
+proposals$url = paste("https://proposals.decred.org/proposals/", proposals$prop.id, sep="")
 
 #make export version for crypto-governance-research
 voted.props$url = paste("https://proposals.decred.org/proposals/", voted.props$prop.id, sep="")
@@ -259,7 +258,8 @@ names(decred.proposals)[names(decred.proposals) == 'eligible_tickets'] <- 'eligi
 
 write.csv(decred.proposals, "Decred-proposals.csv", row.names = FALSE)
 
-
+decred.proposals.all = subset(proposals, select = c(name,url,yes_votes,no_votes,total_votes,ticket_representation,voting_startdate, voting_enddate, eligible_tickets ))
+write.csv(decred.proposals.all, "Decred-proposals-all.csv", row.names = FALSE)
 
 voted.props$shortname[voted.props$prop.id == "27f87171d98b7923a1bd2bee6affed929fa2d2a6e178b5c80a9971a92a5c7f50"] = "Ditto 1"
 voted.props$shortname[voted.props$prop.id == "2ababdea7da2b3d8312a773d477272135a883ed772ba99cdf31eddb5f261d571"] = "Trust Wallet"
@@ -289,9 +289,14 @@ voted.props$shortname[voted.props$prop.id == "a4f2a91c8589b2e5a955798d6c0f4f77f2
 voted.props$shortname[voted.props$prop.id == "0a1ff846ec271184ea4e3a921a3ccd8d478f69948b984445ee1852f272d54c58"] = "Header commitments"
 voted.props$shortname[voted.props$prop.id == "52ea110ea061c72d3b31ed2f5635720b212ce5e3eaddf868d60f53a3d18b8c04"] = "Ditto 2"
 voted.props$shortname[voted.props$prop.id == "67de0e901143400ae2f247391c4d5028719ffea8308fbc5854745ad859fb993f"] = "Research 2"
+voted.props$shortname[voted.props$prop.id == "073694ed82d34b2bfff51e35220e8052ad4060899b23bc25791a9383375cae70"] = "Bug Bounty 2"
+voted.props$shortname[voted.props$prop.id == "20e967dad9e7398901decf3cfe0acf4e0853f6558a62607265c63fe791b8b124"] = "TinyDecred"
+voted.props$shortname[voted.props$prop.id == "30822c16533890abc6e243eb6d12264b207c3923c14af42cd9b883e71c7003cd"] = "MM RFP"
+voted.props$shortname[voted.props$prop.id == "417607aaedff2942ff3701cdb4eff76637eca4ed7f7ba816e5c0bd2e971602e1"] = "DEX Development"
+voted.props$shortname[voted.props$prop.id == "78b50f218106f5de40f9bd7f604b048da168f2afbec32c8662722b70d62e4d36"] = "Decred metrics 1"
 
-
-
+#props without names
+#voted.props[is.na(voted.props$shortname),]
 
 decred.proposals.pi = subset(voted.props, select = c(name,url,yes_votes,no_votes,total_votes,ticket_representation,voting_startdate, voting_enddate, eligible_tickets,comments,shortname ))
 
@@ -302,7 +307,7 @@ x = sapply(proposals$prop.id, last.activity)
 x = sapply(proposals$prop.id, last.activity.notcomment)
 
 #select the props to be processed and written up - from date of last snapshot for Pi digest or Journal
-recentprops = proposals[proposals$last_activity > 1564622264,]
+recentprops = proposals[proposals$last_activity > 1565650822,]
 
 
 #print results for Pi digest
@@ -314,8 +319,11 @@ props = recentprops$prop.id
 x = sapply(props, print.twitter.result)
 
 #print recent stats for pi digest and journal - can use sys.time if used at snapshot time
-print.pi.recent(1564622264, Sys.time())
+print.pi.recent(1565650822, Sys.time())
 
 
-
+#
+#for full historical activity stats
+recentprops = proposals
+print.pi.recent(0, Sys.time())
 
