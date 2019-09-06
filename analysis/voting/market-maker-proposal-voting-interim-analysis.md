@@ -26,5 +26,7 @@ Virtually all of the tickets that voted Yes on Tantra also voted on i2, with mor
 I also looked at the previous voting of the tickets that voted Yes to each proposal. For this I am using the number of previous proposals (not one of these 3 proposals) that the ticket voted on as an indicator of how involved that ticket has been in Decred's governance. Tickets of different ages will have had different numbers of opportunities to vote on proposals prior to this, but when averaging over thousands of tickets this should balance out.
 
 The tickets that voted Yes to Grapefruit had voted on a mean 1.3 proposals previously.
+
 The tickets that voted Yes to i2 Trading had voted on a mean 1.14 proposals previously.
+
 The tickets that voted Yes to Tantra Labs had voted on a mean 1.2 proposals previously.
