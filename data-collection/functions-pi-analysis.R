@@ -459,6 +459,7 @@ plot.proposals = function(commits.df, chartname){
 }
 
 
+
 plot.proposal = function(prop.id, title){
   prop = prop.id
   print(prop)
@@ -587,3 +588,52 @@ plot.votes.proposal = function(proposal, name){
   ggsave(paste(name, "-proposal-voting-over-time.png", sep=""),  height = 12, width = 8)
   return(propcommits)
 }
+
+
+
+process.dupedata = function(dupedata){
+  for(row in 1:nrow(dupedata)){
+    if(row == 1){
+      dupedata$running[row] = dupedata$vote[row]
+      thisrow = dupedata[row,]
+      df.comment.votes = df.comment.votes[!(df.comment.votes$comment.uid == thisrow$comment.uid & df.comment.votes$username == thisrow$username),]
+      assign('df.comment.votes', df.comment.votes, envir=.GlobalEnv)
+      print("removing from main df")
+    }
+    else if(row == nrow(dupedata))
+    {
+      prevrow = dupedata[row - 1,]
+      thisrow = dupedata[row,]
+      if(prevrow$running == thisrow$vote){
+        dupedata$running[row] = 0
+      }
+      if(prevrow$running != thisrow$vote){
+        dupedata$running[row] = thisrow$vote
+      }      
+      
+      if(dupedata$running[row] != 0)
+      {
+        #add one appropriate row to the main df, if required
+        thisrow = dupedata[row,]
+        thisrow$vote = thisrow$running
+        thisrow = data.frame(thisrow)
+        thisrow = subset(thisrow, select = -c(running) )
+        df.comment.votes = rbind(df.comment.votes, thisrow)
+        print("added row to df")
+        assign('df.comment.votes', df.comment.votes, envir=.GlobalEnv)
+      }
+    }
+    else if(row > 1 & row != nrow(dupedata)){
+      prevrow = dupedata[row - 1,]
+      thisrow = dupedata[row,]
+      if(prevrow$running == thisrow$vote){
+        dupedata$running[row] = 0
+      }
+      if(prevrow$running != thisrow$vote){
+        dupedata$running[row] = thisrow$vote
+      }
+    }
+  }
+}
+
+
