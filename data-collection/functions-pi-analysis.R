@@ -296,12 +296,12 @@ votes.df.recent = votes.df[votes.df$castvote.token %in% voted.proposals.recent$p
   cat(paste("* ", prettyNum(nrow(df.comments.recent), big.mark = ","), " comments on Politeia proposals from ", length(unique(df.comments.recent$username)),
             " different users.", sep=""), file = 'journal-pi-recent.md', sep = '\n', append = T)
   cat(paste("* ", prettyNum(nrow(df.comment.votes.recent), big.mark = ","), " up/down votes on comments from ", 
-            length(unique(df.comments.recent$username)), " different voting users."),
+            length(unique(df.comment.votes.recent$username)), " different voting users."),
       file = 'journal-pi-recent.md', append = T, sep = '\n')
   cat(paste("* ", prettyNum(nrow(df.comment.votes.recent[df.comment.votes.recent$vote == 1,]), big.mark = ","), 
-            " upvotes (", round((nrow(df.comment.votes.recent[df.comment.votes.recent$vote == 1,])/nrow(df.comment.votes.recent)),1)*100, "%) and ",
+            " upvotes (", round((nrow(df.comment.votes.recent[df.comment.votes.recent$vote == 1,])/nrow(df.comment.votes.recent)),2)*100, "%) and ",
             nrow(df.comment.votes.recent[df.comment.votes.recent$vote == -1,]), " downvotes (",
-            round((nrow(df.comment.votes.recent[df.comment.votes.recent$vote == -1,])/nrow(df.comment.votes.recent)),1)*100, "%).", sep=""),
+            round((nrow(df.comment.votes.recent[df.comment.votes.recent$vote == -1,])/nrow(df.comment.votes.recent)),2)*100, "%).", sep=""),
       file = 'journal-pi-recent.md', append = T, sep = '\n')
 
 }
