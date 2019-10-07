@@ -306,6 +306,36 @@ votes.df.recent = votes.df[votes.df$castvote.token %in% voted.proposals.recent$p
 
 }
 
+
+print.pi.all = function(timesince, timetill){
+  df.comments.recent = df.comments[df.comments$timestamp > timesince & df.comments$timestamp < timetill,]
+  df.comment.votes.recent = df.comment.votes[df.comment.votes$timestamp > timesince & df.comment.votes$timestamp < timetill,]
+  new.props = nrow(proposals[proposals$published_at_unix > timesince & proposals$published_at_unix < timetill,])
+  voted.proposals.recent = proposals[!is.na(proposals$voting_endtime) & proposals$voting_endtime < timetill & proposals$voting_endtime > timesince,]
+  voting.props = nrow(proposals[proposals$voting_starttime > timesince & proposals$voting_starttime < timetill & !is.na(proposals$voting_starttime),])
+  votes.df.recent = votes.df[votes.df$castvote.token %in% voted.proposals.recent$prop.id,]
+  
+  
+  cat(paste("Since Politeia Launched on Oct 16 2018 until ", strftime(as.POSIXct(timetill, origin = "1970-01-01"), "%b %e %Y"), " there were:", sep=""),
+      file = 'journal-pi-recent.md', sep = '\n')
+  cat(paste("* ", prettyNum(new.props, big.mark = ","), " new proposals submitted, ", voting.props,
+            " proposals started voting, ", nrow(voted.proposals.recent), " proposals finished voting.", sep=""), file = 'journal-pi-recent.md', sep = '\n', append = T)
+  cat(paste("* Proposals that have finished voting have an average (mean) turnout of ", round(mean(voted.proposals.recent$ticket_representation), 1) , "%, with a total of ", prettyNum(nrow(votes.df.recent), big.mark = ",") ,
+            " ticket votes being cast.", sep=""), file = 'journal-pi-recent.md', sep = '\n', append = T)  
+  cat(paste("* ", prettyNum(nrow(df.comments.recent), big.mark = ","), " comments on Politeia proposals from ", length(unique(df.comments.recent$username)),
+            " different users.", sep=""), file = 'journal-pi-recent.md', sep = '\n', append = T)
+  cat(paste("* ", prettyNum(nrow(df.comment.votes.recent), big.mark = ","), " up/down votes on comments from ", 
+            length(unique(df.comment.votes.recent$username)), " different voting users."),
+      file = 'journal-pi-recent.md', append = T, sep = '\n')
+  cat(paste("* ", prettyNum(nrow(df.comment.votes.recent[df.comment.votes.recent$vote == 1,]), big.mark = ","), 
+            " upvotes (", round((nrow(df.comment.votes.recent[df.comment.votes.recent$vote == 1,])/nrow(df.comment.votes.recent)),2)*100, "%) and ",
+            nrow(df.comment.votes.recent[df.comment.votes.recent$vote == -1,]), " downvotes (",
+            round((nrow(df.comment.votes.recent[df.comment.votes.recent$vote == -1,])/nrow(df.comment.votes.recent)),2)*100, "%).", sep=""),
+      file = 'politeia-stats-all.md', append = T, sep = '\n')
+  
+}
+
+
 fix.latevotes = function()
 {
   prop = c("5431da8ff4eda8cdbf8f4f2e08566ffa573464b97ef6d6bae78e749f27800d3a", "60adb9c0946482492889e85e9bce05c309665b3438dd85cb1a837df31fbf57fb", "a3def199af812b796887f4eae22e11e45f112b50c2e17252c60ed190933ec14f", "c84a76685e4437a15760033725044a15ad832f68f9d123eb837337060a09f86e", "d3e7f159b9680c059a3d4b398de2c8f6627108f28b7d61a3f10397acb4b5e509")
