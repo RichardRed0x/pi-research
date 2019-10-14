@@ -38,6 +38,8 @@ latest.version = function(p){
 #function to pull all comments and votes associated with a proposal
 get.comments = function(p, version)
 {
+  print(p)
+  print(version)
   #locate and pull in comments.journal
   filename = paste(p, "/", version, "/plugins/decred/comments.journal", sep="")
   prop.input = readChar(filename, file.info(filename)$size)
