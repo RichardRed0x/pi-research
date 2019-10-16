@@ -16,31 +16,35 @@ There is yet to be a proposal with less than 20% voter turnout, probably related
 
 ![](Politeia-proposals-approval.png)
 
-Most of the approved proposals are overwhelmingly approved. The approval threshold is 60%, but 18 of 25 approved proposals had > 80%, 13 had >90% approval.
+Most of the approved proposals had high approval levels. The approval threshold is 60%, but 18 of 25 approved proposals had > 80%, 13 had >90% approval.
 
 
 
 ![](Politeia-proposals-domain.png)
 
-This is based on my own quick categorization of the proposals. Aside from a lot of marketing proposals no other type dominates the platform.
+This is based on my own quick categorization of the proposals. Aside from a lot of marketing proposals there is a roughly even mix of other types.
 
 ![](Politeia-proposals-domain-state.png)
 
-The functionality to output stats about Treasury spending has not yet been developed for Politeia, so it is not possible to know how much has been paid out for each of the approved proposals so far. The following graph shows the total (maximum) budget approved in each of the domains, but where these budgets have been approved recently it is likely they have not all been spent yet. There are also areas of the project which are not yet well covered by Politeia proposals, like software development, where many of the teams who were working pre-Politeia are still working.
+Marketing proposals are less likely to be approved than other types like Software Development, Research and Policy proposals. Underlying these figures are a number of highly speculative marketing proposals, most of the proposals I classified as Misc are also speculative bordering on shower thoughts.
+
+The functionality to output stats about Treasury spending has not yet been developed for Politeia, so it is not possible to know how much has been paid out for each of the approved proposals so far. The following graph shows the total (maximum) budget approved for all proposals in each of the domains, but where these budgets have been approved recently it is likely they have not yet been spent yet. There are also areas of the project which are not yet well covered by Politeia proposals, like software development, where many of the projects that started pre-Politeia are still going.
 
 
 
 ![](Politeia-proposals-domain-maxcost.png)
 
-Interesting to note that there are quite a few proposals from people who were already a contractor when they submitted the proposal, around 35% of proposals are from contractors. Proposals from contractors are also more likely to be approved. This is I think quite illustrative of one side of Politeia, where it serves as a way for the stakeholders to give their continued backing to the contractors who are active in important areas and whatever decisions they made which warranted a proposal.
+The next chart presents the same information but broken down by whether the proposal author was a contractor at the time of the proposal's submission.
 
 ![](Politeia-proposals-contractor-domain.png)
 
-This scatterplot shows all the proposals, positioned according to their turnout and approval, sizes by max cost and colored by domain.
+Interesting to note that there are quite a few proposals from people who were already a contractor when they submitted the proposal, around 35% of proposals are from contractors. Proposals from contractors are also more likely to be approved. This is I think quite illustrative of one side of Politeia, where it serves as a way for the stakeholders to give their continued backing to the contractors who are active in important areas of the project. When contractors reach a point where they need to make a proposal about something, stakeholders are usually supportive of those proposals (e.g. DEX, Marketing and Events budgets). 
+
+This scatterplot shows all the proposals, positioned according to their turnout and approval, size determined by max cost and colored by domain. It does not include Abandoned or Live proposals.
 
 ![](Politeia-proposals-scatterplot.png)
 
-
+The mean number of comments per proposal is 30, 
 
 Refreshed standard proposals over time graph
 
