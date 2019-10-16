@@ -3,34 +3,42 @@ library(jsonlite)
 library(RCurl)
 library(plyr)
 library(dplyr)
-
+setwd("C:\\Users\\richa\\Documents\\GitHub\\pi-research\\data-collection")
 source("functions-pi-analysis.R")
 
-props = read.csv("Decred-proposals-all-augmented.csv", stringsAsFactors = FALSE)
+
 
 table(props$state)
 
-sprops = props[props$cost <= 1000000,]
+
 
 decred = read.csv("decred-proposals.csv", stringsAsFactors = FALSE)
 decred$approval = round((decred$yes_votes/decred$total_votes)*100, 1)
 props$approval = round((props$yes_votes/props$total_votes)*100, 1)
+props$domain[props$domain == "Software Development"] = "Software Dev"
 
-p.decred = ggplot(decred, aes(voter_participation))+
+
+
+
+p.participation = ggplot(decred, aes(voter_participation))+
   geom_histogram(bins = 20)+
   xlab("Voter participation %")+
   ylab("Number of proposals")+
-  ggtitle("Politeia Proposals")
+  ggtitle("Politeia Proposals")+
+  theme(text = element_text(size = 15), axis.text.x = element_text(size = 15))
 
-ggsave("Politeia-proposals-participation.png", width = 9.55, height = 5)
+
+
+ggsave("Politeia-proposals-participation.png", width = 10, height = 5.625)
 
 p.approval = ggplot(decred, aes(approval))+
   geom_histogram(bins = 20)+
-  xlab("Voter participation %")+
+  xlab("% of Tickets Voting Yes")+
   ylab("Number of proposals")+
-  ggtitle("Politeia Proposals")
+  ggtitle("Politeia Proposals")+
+  theme(text = element_text(size = 15), axis.text.x = element_text(size = 15))
 
-ggsave("Politeia-proposals-approval.png", width = 9.55, height = 5)
+ggsave("Politeia-proposals-approval.png", width = 10, height = 5.625)
 
 
 #props per category, fill status
@@ -38,28 +46,35 @@ ggsave("Politeia-proposals-approval.png", width = 9.55, height = 5)
 p.domain = ggplot(props)+
   aes(x = domain, fill = domain)+
   geom_bar()+
-  labs(x = "Proposal Domain", y = "No. of Proposals")
+  labs(x = "Proposal Domain", y = "No. of Proposals")+
+  theme(text = element_text(size = 15), axis.text.x = element_text(size = 11))+
+  theme(legend.position="none")
 
-ggsave("Politeia-proposals-domain.png", width = 9.55, height = 5)
+ggsave("Politeia-proposals-domain.png",  width = 10, height = 5.625)
 
 p.domain.status = ggplot(props)+
   aes(x = domain, fill = state)+
   geom_bar()+
-  labs(x = "Proposal Domain", y = "No. of Proposals")
+  labs(x = "Proposal Domains", y = "No. of Proposals")+
+  theme(text = element_text(size = 15), axis.text.x = element_text(size = 11))+
+  scale_fill_manual(values=c("#70cbff", "#41bf53", "#2970ff", "#ed6d47"))
 
-ggsave("Politeia-proposals-domain-state.png", width = 9.55, height = 5)
+
+ggsave("Politeia-proposals-domain-state.png", width = 10, height = 5.625)
 
 
 props.noreum = props[props$cost <= 1000000,]
 p.cost.duration = ggplot(props.noreum)+
   aes(x = cost, y = duration)+
-  geom_point(aes(colour = state))+
+  geom_point(aes(colour = state), size = 3, position = "jitter")+
   geom_smooth(method = "lm", se = FALSE)+
-  labs(x = "Proposal Maximum Cost", y = "Proposal Approximate/Maximum Duration")+
+  labs(x = "Proposal Maximum Cost ($)", y = "Proposal Approximate/Maximum Duration")+
   scale_x_continuous(labels = scales::comma)+
-  scale_y_continuous(breaks = c(0, 3, 6, 9, 12))
-ggsave("Politeia-proposals-cost-duration.png", width = 9.55, height = 5)  
+  scale_y_continuous(breaks = c(0, 3, 6, 9, 12)) +
+  theme(text = element_text(size = 15), axis.text.x = element_text(size = 15))+
+  scale_colour_manual(values=c("#70cbff", "#41bf53", "#2970ff", "#ed6d47"))
 
+ggsave("Politeia-proposals-cost-duration.png", width = 10, height = 5.625) 
 # bar chart showing cumulative budget of approved proposals per domain
 approved.props = props[props$state == "Approved",]
 
@@ -67,9 +82,10 @@ p.domain.costs = ggplot(approved.props)+
   aes(x = domain, fill = domain, y = cost)+
   geom_bar(stat = "sum")+
   labs(x = "Proposal Domain", y = "Cumulative maximum cost of approved proposals")+
-  scale_y_continuous(labels = scales::comma)
+  scale_y_continuous(labels = scales::comma)+
+  theme(text = element_text(size = 15), axis.text.x = element_text(size = 15))
 
-ggsave("Politeia-proposals-domain-maxcost.png", width = 9.55, height = 5)
+ggsave("Politeia-proposals-domain-maxcost.png", width = 10, height = 5.625)
 
 props$contractor[props$contractor == "TRUE"] = "Contractor"
 props$contractor[props$contractor == "FALSE"] = "Not a Contractor"
@@ -81,10 +97,11 @@ p.status.contractor = ggplot(sprops)+
   aes(x = state, fill = domain)+
   geom_bar()+
   facet_grid(contractor~.)+
-  labs(x = "Proposal Outcome", y = "No. of Proposals")
+  labs(x = "Proposal Outcome", y = "No. of Proposals")+
+  theme(text = element_text(size = 15), axis.text.x = element_text(size = 15))
 
 
-ggsave("Politeia-proposals-contractor-domain.png", width = 9.55, height = 5)
+ggsave("Politeia-proposals-contractor-domain.png", width = 10, height = 5.625)
 
 
 #scatterplot participation x approval, colour = domain, size = cost
@@ -93,10 +110,11 @@ vprops = sprops[sprops$state != "Abandoned",]
 p.proposals = ggplot(vprops)+
   aes(x = approval, y = ticket_representation, size = cost, colour = domain)+
         geom_point()+
-  labs(x = "Approval %", y = "Voter turnout")
+  labs(x = "Approval %", y = "Voter turnout")+
+  theme(text = element_text(size = 15), axis.text.x = element_text(size = 15))
 
 
-ggsave("Politeia-proposals-scatterplot.png", width = 9.55, height = 5)
+ggsave("Politeia-proposals-scatterplot.png", , width = 10, height = 5.625)
 
 
 #scatterplot proposal cost X duration
@@ -124,9 +142,10 @@ sdf.comments = df.comments[df.comments$day<=40,]
 p.comments.day = ggplot(sdf.comments, aes(day))+
   geom_histogram(bins = 20)+
   labs(y = "Comments", x = "Days after Proposal Published")+
-  theme(axis.text=element_text(size=8))
+  theme(axis.text=element_text(size=8))+
+  theme(text = element_text(size = 15), axis.text.x = element_text(size = 15))
 
-ggsave("Politeia-comment-timing.png", width = 9.55, height = 5)
+ggsave("Politeia-comment-timing.png", width = 10, height = 5.625)
 
 df.comment.votes$starttime = 0
 for(p in proposals$prop.id)
@@ -140,9 +159,9 @@ sdf.comment.votes = df.comment.votes[df.comment.votes$day<=40,]
 p.commentvotes.day = ggplot(sdf.comment.votes, aes(day))+
   geom_histogram(bins = 20)+
   labs(y = "Votes on Comments", x = "Days after Proposal Published")+
-  theme(axis.text=element_text(size=8))
+  theme(text = element_text(size = 15), axis.text.x = element_text(size = 15))
 
-ggsave("Politeia-comment-vote-timing.png", width = 9.55, height = 5)
+ggsave("Politeia-comment-vote-timing.png", width = 10, height = 5.625)
 
 nrow(df.comments[df.comments$day <= 10,])/nrow(df.comments)
 nrow(df.comments[df.comments$day <= 5,])/nrow(df.comments)
@@ -164,7 +183,3 @@ p.participation.time = ggplot(decred.proposals.pi)+
         axis.ticks.x=element_blank())
 
 ggsave("proposal-participation-and-approval-in-order.png", width = 10, height = 5.625)
-
-
-
-
