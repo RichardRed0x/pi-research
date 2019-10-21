@@ -3,6 +3,10 @@ library(jsonlite)
 library(RCurl)
 library(plyr)
 library(dplyr)
+source("functions-pi-analysis.R")
+
+
+
 
 
 
@@ -18,11 +22,11 @@ proposals$version = apply(proposals, 1, function(y) latest.version(y['prop.id'])
 
 prop.comments = apply(proposals, 1, function(y) get.comments(y['prop.id'], y['version']))
 
-df <- do.call("rbind", prop.comments)
+
+
+
+df <- do.call("rbind.fill", prop.comments)
 df$comment.uid = paste(df$token, "/comments/", df$commentid, sep="")
-
-
-
 
 
 #process metadata.txt files
@@ -43,18 +47,30 @@ username = seq(1:length(pubkey))
 keynames = data.frame(pubkey, username)  
 
 
-for(pk in keynames$pubkey)
+#for(pk in keynames$pubkey)
+#{
+#  keynames$username[keynames$pubkey == pk] = process.pubkey(pk)
+#}
+#write.csv(keynames, file = "pi-user-keys-names.csv", row.names = FALSE)
+
+keynames = read.csv("pi-user-keys-names.csv", stringsAsFactors = FALSE)
+
+#find new pk not in keynames
+upk = unique(df$publickey)
+newpk = upk[!(upk %in% keynames$pubkey)]
+
+for(pk in newpk)
 {
-  keynames$username[keynames$pubkey == pk] = process.pubkey(pk)
+  newrow = data.frame(pk, process.pubkey(pk))
+  names(newrow)<-c("pubkey","username")
+  keynames = rbind(keynames, newrow)
 }
 write.csv(keynames, file = "pi-user-keys-names.csv", row.names = FALSE)
 
-keynames = read.csv("pi-user-keys-names.csv", stringsAsFactors = FALSE)
 
 for(pk in df$publickey)
 {
   df$username[df$publickey == pk] = keynames$username[keynames$pubkey == pk]
-  
 }
 
 
@@ -70,52 +86,6 @@ dupes = df.comment.votes %>%
   filter(n()>1)
 
 dupes = as.data.frame(dupes)
-
-
-process.dupedata = function(dupedata){
-  for(row in 1:nrow(dupedata)){
-    if(row == 1){
-      dupedata$running[row] = dupedata$vote[row]
-      thisrow = dupedata[row,]
-      df.comment.votes = df.comment.votes[!(df.comment.votes$comment.uid == thisrow$comment.uid & df.comment.votes$username == thisrow$username),]
-      assign('df.comment.votes', df.comment.votes, envir=.GlobalEnv)
-      print("removing from main df")
-    }
-    else if(row == nrow(dupedata))
-       {
-      prevrow = dupedata[row - 1,]
-      thisrow = dupedata[row,]
-      if(prevrow$running == thisrow$vote){
-        dupedata$running[row] = 0
-      }
-      if(prevrow$running != thisrow$vote){
-        dupedata$running[row] = thisrow$vote
-      }      
-          
-         if(dupedata$running[row] != 0)
-         {
-           #add one appropriate row to the main df, if required
-           thisrow = dupedata[row,]
-           thisrow$vote = thisrow$running
-           thisrow = data.frame(thisrow)
-           thisrow = subset(thisrow, select = -c(running) )
-           df.comment.votes = rbind(df.comment.votes, thisrow)
-           print("added row to df")
-           assign('df.comment.votes', df.comment.votes, envir=.GlobalEnv)
-         }
-    }
-    else if(row > 1 & row != nrow(dupedata)){
-      prevrow = dupedata[row - 1,]
-      thisrow = dupedata[row,]
-      if(prevrow$running == thisrow$vote){
-        dupedata$running[row] = 0
-      }
-      if(prevrow$running != thisrow$vote){
-        dupedata$running[row] = thisrow$vote
-      }
-    }
-  }
-}
 
 
 for(c in unique(dupes$comment.uid))
@@ -164,8 +134,9 @@ comments= seq(1:length(username))
 upvotes= seq(1:length(username))
 downvotes= seq(1:length(username))
 commentscore= seq(1:length(username))
+selfvotes = seq(1:length(username))
 
-users = data.frame(username, comments, upvotes, downvotes, commentscore)
+users = data.frame(username, comments, upvotes, downvotes, commentscore, selfvotes)
 
 for(u in users$username)
 {
@@ -173,7 +144,7 @@ for(u in users$username)
   users$upvotes[users$username == u] = nrow(df.comment.votes[df.comment.votes$username == u & df.comment.votes$vote == 1,])
   users$downvotes[users$username == u] = nrow(df.comment.votes[df.comment.votes$username == u & df.comment.votes$vote == -1,])
   users$commentscore[users$username == u] = sum(df.comments$score[df.comments$username == u])
-  
+  users$selfvotes[users$username == u] = nrow(df.comments[df.comments$username == u & df.comments$selfvote == 1,])
 }
 users$score.per.comment = users$commentscore/users$comments
 
@@ -240,6 +211,14 @@ x = apply(proposals, 1, function(y) update.voting.status(y['prop.id']))
 x = sapply(proposals$prop.id, last.activity)
 x = sapply(proposals$prop.id, last.activity.notcomment)
 
+proposals$comments = 0
+proposals$comment.votes = 0
+for(p in proposals$prop.id)
+{
+  proposals$comments[proposals$prop.id == p] = nrow(df.comments[df.comments$token == p,])
+  proposals$comment.votes[proposals$prop.id == p] = nrow(df.comment.votes[df.comment.votes$token == p,])
+}
+
 
 
 voted.props = proposals[!is.na(proposals$voting_endtime),]
@@ -247,8 +226,11 @@ proposals$url = paste("https://proposals.decred.org/proposals/", proposals$prop.
 
 #make export version for crypto-governance-research
 voted.props$url = paste("https://proposals.decred.org/proposals/", voted.props$prop.id, sep="")
+
+
 decred.proposals = subset(voted.props, select = c(name,url,yes_votes,no_votes,total_votes,ticket_representation,voting_startdate, voting_enddate, eligible_tickets ))
 decred.proposals$project = "Decred"
+
 
 
 names(decred.proposals)[names(decred.proposals) == 'name'] <- 'title'
@@ -258,7 +240,7 @@ names(decred.proposals)[names(decred.proposals) == 'eligible_tickets'] <- 'eligi
 
 write.csv(decred.proposals, "Decred-proposals.csv", row.names = FALSE)
 
-decred.proposals.all = subset(proposals, select = c(name,url,yes_votes,no_votes,total_votes,ticket_representation,voting_startdate, voting_enddate, eligible_tickets ))
+decred.proposals.all = subset(proposals, select = c(name,url,yes_votes,no_votes,total_votes,ticket_representation,comments, comment.votes,voting_startdate, voting_enddate, eligible_tickets ))
 write.csv(decred.proposals.all, "Decred-proposals-all.csv", row.names = FALSE)
 
 voted.props$shortname[voted.props$prop.id == "27f87171d98b7923a1bd2bee6affed929fa2d2a6e178b5c80a9971a92a5c7f50"] = "Ditto 1"
@@ -294,20 +276,26 @@ voted.props$shortname[voted.props$prop.id == "20e967dad9e7398901decf3cfe0acf4e08
 voted.props$shortname[voted.props$prop.id == "30822c16533890abc6e243eb6d12264b207c3923c14af42cd9b883e71c7003cd"] = "MM RFP"
 voted.props$shortname[voted.props$prop.id == "417607aaedff2942ff3701cdb4eff76637eca4ed7f7ba816e5c0bd2e971602e1"] = "DEX Development"
 voted.props$shortname[voted.props$prop.id == "78b50f218106f5de40f9bd7f604b048da168f2afbec32c8662722b70d62e4d36"] = "Decred metrics 1"
+voted.props$shortname[voted.props$prop.id == "82ce113827140caaaf8b5779ab30402d3ed39f1911fdd2e8fa64cf0dc9e09ecb"] = "MM Tantra"
+voted.props$shortname[voted.props$prop.id == "4becbe00bd5ae93312426a8cf5eeef78050f5b8b8430b45f3ea54ca89213f82b"] = "MM Grapefruit"
+voted.props$shortname[voted.props$prop.id == "2eb7ddb29f151691ba14ac8c54d53f6692c1f5e8fe06244edf7d3c33fb440bd9"] = "MM i2"
+voted.props$shortname[voted.props$prop.id == "f0d1bd7447182328b44c691de88cb660b63df17f1f3a94990af19acea57c09bb"] = "Permabull research"
+voted.props$shortname[voted.props$prop.id == "fdd68c87961549750adf29e178128210cb310294080211cf6a35792aa1bb7f63"] = "Events in CIS"
+
 
 #props without names
 #voted.props[is.na(voted.props$shortname),]
 
 decred.proposals.pi = subset(voted.props, select = c(name,url,yes_votes,no_votes,total_votes,ticket_representation,voting_startdate, voting_enddate, eligible_tickets,comments,shortname ))
 
-write.csv(decred.proposals.pi, "Decred-proposals-pi.csv", row.names = FALSE)
+write.csv(decred.proposals.pi, "Decred-proposals-voted.csv", row.names = FALSE)
 
 #prepare info for texts
 x = sapply(proposals$prop.id, last.activity)
 x = sapply(proposals$prop.id, last.activity.notcomment)
 
 #select the props to be processed and written up - from date of last snapshot for Pi digest or Journal
-recentprops = proposals[proposals$last_activity > 1565650822,]
+recentprops = proposals[proposals$last_activity > 1570661700,]
 
 
 #print results for Pi digest
@@ -319,11 +307,43 @@ props = recentprops$prop.id
 x = sapply(props, print.twitter.result)
 
 #print recent stats for pi digest and journal - can use sys.time if used at snapshot time
-print.pi.recent(1565650822, Sys.time())
+print.pi.recent(1570661700, Sys.time())
 
 
 #
 #for full historical activity stats
 recentprops = proposals
-print.pi.recent(0, Sys.time())
+print.pi.all(0, Sys.time())
+
+
+
+
+
+#
+decred.proposals.pi$voting_enddate = as.POSIXct(decred.proposals.pi$voting_enddate  ) 
+
+decred.proposals.pi = decred.proposals.pi[order(decred.proposals.pi$voting_enddate),]
+decred.proposals.pi$seq = seq(1:nrow(decred.proposals.pi))
+decred.proposals.pi$outcome = "Approved"
+decred.proposals.pi$outcome[(decred.proposals.pi$yes_votes/decred.proposals.pi$total_votes) < 0.6] = "Rejected"
+decred.proposals.pi$Outcome = factor(decred.proposals.pi$outcome, levels = c("Rejected", "Approved"))
+decred.proposals.pi$approval = decred.proposals.pi$yes_votes/decred.proposals.pi$total_votes
+decred.proposals.pi$ticket_support = decred.proposals.pi$ticket_representation*decred.proposals.pi$approval
+
+p.participation.time = ggplot(decred.proposals.pi)+
+  aes(x = seq, y = ticket_representation)+
+  geom_bar(stat = "identity", fill = "#2970FF")+
+  geom_point(aes(x = seq, y = ticket_support, colour = Outcome), size = 3)+
+  geom_text(aes(label=shortname), position=position_stack(vjust=0.5), angle = 90, size = 4)+
+  labs(y = "% of eligible tickets", title = "Decred Politeia proposals - voter participation (bars) and outcomes (points)")+
+  theme(axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank())
+
+
+
+
+ggsave("proposal-participation-and-approval-in-order.png", width = 10, height = 5.625)
+
+
 
